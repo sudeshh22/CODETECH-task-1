@@ -1,0 +1,83 @@
+/* verilog code for adder using xilink */
+module adder_4bit(
+    input [3:0] A,      // 4-bit input A
+    input [3:0] B,      // 4-bit input B
+    input Cin,          // Carry input
+    output [3:0] Sum,   // 4-bit sum output
+    output Cout         // Carry output
+);
+
+    // Internal wire for the carry signals between each bit addition
+    wire C1, C2, C3;
+
+    // Full adder for bit 0 (Least Significant Bit)
+    full_adder FA0 (
+        .A(A[0]),
+        .B(B[0]),
+        .Cin(Cin),
+        .Sum(Sum[0]),
+        .Cout(C1)
+    );
+
+    // Full adder for bit 1
+    full_adder FA1 (
+        .A(A[1]),
+        .B(B[1]),
+        .Cin(C1),
+        .Sum(Sum[1]),
+        .Cout(C2)
+    );
+
+    // Full adder for bit 2
+    full_adder FA2 (
+        .A(A[2]),
+        .B(B[2]),
+        .Cin(C2),
+        .Sum(Sum[2]),
+        .Cout(C3)
+    );
+
+    // Full adder for bit 3 (Most Significant Bit)
+    full_adder FA3 (
+        .A(A[3]),
+        .B(B[3]),
+        .Cin(C3),
+        .Sum(Sum[3]),
+        .Cout(Cout)
+    );
+
+endmodule
+
+// Full adder module definition
+module full_adder (
+    input A,            // 1-bit input A
+    input B,            // 1-bit input B
+    input Cin,          // Carry input
+    output Sum,         // 1-bit sum output
+    output Cout         // Carry output
+);
+
+    assign Sum = A ^ B ^ Cin;    // Sum is A XOR B XOR Cin
+    assign Cout = (A & B) | (Cin & (A ^ B));  // Carry is (A AND B) OR (Cin AND (A XOR B))
+
+endmodule
+
+/* verilog code for multiplier using xilink */
+module multiplier_4bit (
+    input [3:0] A,    // 4-bit input A
+    input [3:0] B,    // 4-bit input B
+    output [7:0] P    // 8-bit product output
+);
+
+    wire [7:0] partial_sum_0, partial_sum_1, partial_sum_2, partial_sum_3;
+
+    // Generate the partial sums for each bit of B
+    assign partial_sum_0 = (A & {4{B[0]}});      // A multiplied by B[0]
+    assign partial_sum_1 = (A & {4{B[1]}}) << 1; // A multiplied by B[1], shifted by 1 bit
+    assign partial_sum_2 = (A & {4{B[2]}}) << 2; // A multiplied by B[2], shifted by 2 bits
+    assign partial_sum_3 = (A & {4{B[3]}}) << 3; // A multiplied by B[3], shifted by 3 bits
+
+    // Sum up all the partial products to get the final product
+    assign P = partial_sum_0 + partial_sum_1 + partial_sum_2 + partial_sum_3;
+
+endmodule
